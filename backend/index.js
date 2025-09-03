@@ -2,6 +2,7 @@
 const express = require("express");
 const app = express();
 
+const { connectDB } = require("./src/config/db.js")
 
 const PORT = 3000;
 
@@ -17,3 +18,6 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
+
+
+connectDB();
