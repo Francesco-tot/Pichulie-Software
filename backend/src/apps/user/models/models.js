@@ -6,6 +6,7 @@ const UserSchema = new Schema(
 	"password": { type: String, required: true},
 	"name": { type: String, required: true},
     "age": { type: Number, required: true},
+    "isBlocked": {type: Boolean, default: false}
     },
     { timestamps: true } // create createdAt and updatedAt fields automatically
 )
