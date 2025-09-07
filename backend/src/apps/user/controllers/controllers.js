@@ -5,21 +5,21 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 
-// Helper function for consistent error handling
+// Helper function for error handling
 const handleServerError = (error, context, res) => {
   // Log error details only in development mode
   if (process.env.NODE_ENV === 'development') {
-    console.error(`❌ ${context} error:`, error);
+    console.error(`${context} error:`, error);
     console.error('Stack trace:', error.stack);
   } else {
     // In production, log only essential info without sensitive details
-    console.error(`❌ ${context} error occurred`);
+    console.error(`${context} error occurred`);
   }
   
   // Always return generic message to users
   return res.status(500).json({ 
     success: false,
-    message: 'Inténtalo de nuevo más tarde',
+    message: 'Try it again later',
     error: process.env.NODE_ENV === 'development' ? error.message : undefined
   });
 };
@@ -253,17 +253,17 @@ const validateResetToken = async (req, res) => {
     });
 
   } catch (error) {
-    // For validation endpoint, we need to maintain the specific format
+    // For validation endpoint
     if (process.env.NODE_ENV === 'development') {
-      console.error('❌ Token validation error:', error);
+      console.error('Token validation error:', error);
       console.error('Stack trace:', error.stack);
     } else {
-      console.error('❌ Token validation error occurred');
+      console.error('Token validation error occurred');
     }
     
     return res.status(500).json({ 
       success: false,
-      message: 'Inténtalo de nuevo más tarde',
+      message: 'Try it again later',
       valid: false,
       errorType: 'server_error',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
