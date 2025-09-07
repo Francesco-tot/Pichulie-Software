@@ -50,6 +50,12 @@ const login = async (req, res) => {
   }
 };
 
+// Logout a logged user
+const logout = (req, res) => {
+  res.clearCookie("jwt");
+  res.json({ message: "Logged out" });
+};
+
 // Configure email transporter
 const createEmailTransporter = () => {
   return nodemailer.createTransporter({
@@ -311,4 +317,4 @@ const resendResetToken = async (req, res) => {
   }
 };
 
-module.exports = { login, requestPasswordReset, resetPassword, validateResetToken, resendResetToken };
+module.exports = { login, logout, requestPasswordReset, resetPassword, validateResetToken, resendResetToken };
