@@ -25,6 +25,14 @@ const login = async (req, res) => {
       { expiresIn: '2h' }                    // token's duration
     );
 
+    // Set the token in a HttpOnly, Secure cookie
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 1000 * 60 * 60 * 2
+    });
+
     // If everything is fine, return user data, except for the password
     res.status(200).json({
       message: 'Succesful login',
@@ -33,7 +41,6 @@ const login = async (req, res) => {
         name: user.name,
         email: user.email,
       },
-      token
     });
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
