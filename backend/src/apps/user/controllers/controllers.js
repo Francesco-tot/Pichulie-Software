@@ -2,6 +2,7 @@ const User = require('../models/models');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 const login = async (req, res) => {
@@ -12,8 +13,9 @@ const login = async (req, res) => {
     // Search for the user email in the database
     if (!user) return res.status(401).json({ message: 'Invalid user' });  
 
-    // Check if the password matches
-    if (password !== user.password) return res.status(401).json({ message: 'Invalid password' });
+    // Check if the password matches using bcrypt
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) return res.status(401).json({ message: 'Invalid password' });
 
     // Check if the user is blocked
     if (user.isBlocked) return res.status(423).json({mesagge: 'Account temporarily blocked'});
@@ -155,15 +157,22 @@ const resetPassword = async (req, res) => {
       });
     }
 
+    // Hash the new password with bcrypt (10 salt rounds)
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
     // Update password and mark token as used
-    user.password = newPassword; // In production, you should hash the password
+    user.password = hashedPassword;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     user.resetPasswordUsed = true;
     await user.save();
 
     res.status(200).json({ 
-      message: 'Password reset successful' 
+      success: true,
+      message: 'Contraseña actualizada',
+      redirectTo: '/login',
+      redirectDelay: 500 // milliseconds
     });
 
   } catch (error) {
