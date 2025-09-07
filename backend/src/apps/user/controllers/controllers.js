@@ -5,6 +5,25 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 
+// Helper function for consistent error handling
+const handleServerError = (error, context, res) => {
+  // Log error details only in development mode
+  if (process.env.NODE_ENV === 'development') {
+    console.error(`❌ ${context} error:`, error);
+    console.error('Stack trace:', error.stack);
+  } else {
+    // In production, log only essential info without sensitive details
+    console.error(`❌ ${context} error occurred`);
+  }
+  
+  // Always return generic message to users
+  return res.status(500).json({ 
+    success: false,
+    message: 'Inténtalo de nuevo más tarde',
+    error: process.env.NODE_ENV === 'development' ? error.message : undefined
+  });
+};
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -38,10 +57,7 @@ const login = async (req, res) => {
       token
     });
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Login error:', error);
-    }
-    return res.status(500).json({ message: 'Try again later' });
+    return handleServerError(error, 'Login', res);
   }
 };
 
@@ -114,8 +130,7 @@ const requestPasswordReset = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Password reset request error:', error);
-    return res.status(500).json({ message: 'Error sending reset email' });
+    return handleServerError(error, 'Password reset request', res);
   }
 };
 
@@ -178,8 +193,7 @@ const resetPassword = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Password reset error:', error);
-    return res.status(500).json({ message: 'Error resetting password' });
+    return handleServerError(error, 'Password reset', res);
   }
 };
 
@@ -239,11 +253,20 @@ const validateResetToken = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Token validation error:', error);
+    // For validation endpoint, we need to maintain the specific format
+    if (process.env.NODE_ENV === 'development') {
+      console.error('❌ Token validation error:', error);
+      console.error('Stack trace:', error.stack);
+    } else {
+      console.error('❌ Token validation error occurred');
+    }
+    
     return res.status(500).json({ 
-      message: 'Error validating token',
+      success: false,
+      message: 'Inténtalo de nuevo más tarde',
       valid: false,
-      errorType: 'server_error'
+      errorType: 'server_error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
@@ -313,8 +336,7 @@ const resendResetToken = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Resend token error:', error);
-    return res.status(500).json({ message: 'Error sending reset email' });
+    return handleServerError(error, 'Resend reset token', res);
   }
 };
 
