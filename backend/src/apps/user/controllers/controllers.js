@@ -46,20 +46,21 @@ const login = async (req, res) => {
       { expiresIn: '2h' }                    // token's duration
     );
 
-    // If everything is fine, return user data, except for the password
+// If everything is fine, return user data, except for the password
     res.status(200).json({
       message: 'Succesful login',
+      token,
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
       },
-      token
     });
   } catch (error) {
     return handleServerError(error, 'Login', res);
   }
 };
+
 
 // Configure email transporter
 const createEmailTransporter = () => {
@@ -340,4 +341,4 @@ const resendResetToken = async (req, res) => {
   }
 };
 
-module.exports = { login, requestPasswordReset, resetPassword, validateResetToken, resendResetToken };
+module.exports = { login, logout, requestPasswordReset, resetPassword, validateResetToken, resendResetToken };
