@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const User = require('./src/apps/user/models/models');
+const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 const createTestUser = async () => {
@@ -18,11 +19,14 @@ const createTestUser = async () => {
       return;
     }
 
-    // Crear usuario de prueba
+    // Crear usuario de prueba con contraseña hasheada
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash('password123', saltRounds);
+    
     const testUser = new User({
-      email: 'test@example.com',
-      password: 'password123',
-      name: 'Usuario Test',
+      email: 'prueba@example.com',
+      password: hashedPassword,
+      name: 'Usuario Prueba',
       age: 25,
       isBlocked: false
     });

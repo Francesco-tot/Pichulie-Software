@@ -2,18 +2,19 @@ const User = require('../models/models');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    
+
     // Search for the user email in the database
     if (!user) return res.status(401).json({ message: 'Invalid user' });  
 
-    // Check if the password matches
-    if (password !== user.password) return res.status(401).json({ message: 'Invalid password' });
+    // Check if the password matches using bcrypt
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) return res.status(401).json({ message: 'Invalid password' });
 
     // Check if the user is blocked
     if (user.isBlocked) return res.status(423).json({mesagge: 'Account temporarily blocked'});
@@ -25,17 +26,10 @@ const login = async (req, res) => {
       { expiresIn: '2h' }                    // token's duration
     );
 
-    // Set the token in a HttpOnly, Secure cookie
-    res.cookie("jwt", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 1000 * 60 * 60 * 2
-    });
-
-    // If everything is fine, return user data, except for the password
+// If everything is fine, return user data, except for the password
     res.status(200).json({
       message: 'Succesful login',
+      token,
       user: {
         id: user._id,
         name: user.name,
@@ -59,7 +53,7 @@ const logout = (req, res) => {
 // Configure email transporter
 const createEmailTransporter = () => {
   return nodemailer.createTransporter({
-    service: 'gmail', // Puedes cambiar esto según tu proveedor de email
+    service: 'gmail',
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS
@@ -79,9 +73,10 @@ const requestPasswordReset = async (req, res) => {
     const user = await User.findOne({ email });
     
     if (!user) {
-      // For security, we do not reveal if the email exists or not
-      return res.status(200).json({ 
-        message: 'A reset link has been sent' 
+      // Security: Use 202 Accepted with generic response to prevent email enumeration
+      return res.status(202).json({ 
+        success: true,
+        message: 'You will receive a reset link'
       });
     }
 
@@ -119,7 +114,8 @@ const requestPasswordReset = async (req, res) => {
     await transporter.sendMail(mailOptions);
 
     res.status(200).json({ 
-      message: 'If the email exists, a reset link has been sent' 
+      success: true,
+      message: 'Reset link sent successfully'
     });
 
   } catch (error) {
@@ -168,15 +164,22 @@ const resetPassword = async (req, res) => {
       });
     }
 
+    // Hash the new password with bcrypt (10 salt rounds)
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
     // Update password and mark token as used
-    user.password = newPassword; // In production, you should hash the password
+    user.password = hashedPassword;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     user.resetPasswordUsed = true;
     await user.save();
 
     res.status(200).json({ 
-      message: 'Password reset successful' 
+      success: true,
+      message: 'Password reset successfully',
+      redirectTo: '/login',
+      redirectDelay: 500 // milliseconds
     });
 
   } catch (error) {
@@ -262,9 +265,11 @@ const resendResetToken = async (req, res) => {
     const user = await User.findOne({ email });
     
     if (!user) {
-      // For security, we do not reveal if the email exists or not
-      return res.status(200).json({ 
-        message: 'A new reset link has been sent' 
+      // Security: Use 202 Accepted with generic response to prevent email enumeration
+      return res.status(202).json({ 
+        success: true,
+        message: 'You will receive a reset link',
+        note: 'For security reasons, we do not reveal if the email exists'
       });
     }
 
@@ -308,7 +313,8 @@ const resendResetToken = async (req, res) => {
     }
 
     res.status(200).json({ 
-      message: 'If the email exists, a new reset link has been sent' 
+      success: true,
+      message: 'Nuevo enlace de restablecimiento enviado correctamente'
     });
 
   } catch (error) {
