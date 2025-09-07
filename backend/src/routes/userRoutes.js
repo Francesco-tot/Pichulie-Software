@@ -4,10 +4,11 @@ const loginLimiter = require('../apps/user/middlewares/middlewares');
 
 const router = express.Router();
 
-// Ruta de login existente
+
+// Login route existing
 router.post('/login', loginLimiter, login);
 
-// Rutas para reset de contraseña
+// Routes for password reset
 router.post('/request-reset', requestPasswordReset);
 router.get('/validate-token/:token', validateResetToken);
 router.post('/reset-password', resetPassword);

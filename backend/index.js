@@ -9,18 +9,18 @@ const routes = require("./src/routes/routes")
 const PORT = 3000;
 
 // Middlewares
-app.use(cors()); //Permitir peticiones desde el frontend
+app.use(cors()); // Allow requests from the frontend
 app.use(express.json());
 
-// Rutas principales
+// Main routes
 app.use(routes);
 
 app.get("/", (req, res) => {
-  res.send("Express está funcionando!");
+  res.send("Express is working!");
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
 
 connectDB();
