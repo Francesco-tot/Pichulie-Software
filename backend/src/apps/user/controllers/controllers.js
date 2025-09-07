@@ -160,4 +160,46 @@ const resetPassword = async (req, res) => {
   }
 };
 
-module.exports = { login, requestPasswordReset, resetPassword };
+// Validar token de reset (sin hacer el reset todavía)
+const validateResetToken = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    if (!token) {
+      return res.status(400).json({ 
+        message: 'Token is required',
+        valid: false
+      });
+    }
+
+    // Buscar usuario con el token válido y no expirado
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ 
+        message: 'Invalid or expired reset token',
+        valid: false
+      });
+    }
+
+    // Token válido - devolver información para el frontend
+    res.status(200).json({ 
+      message: 'Token is valid',
+      valid: true,
+      email: user.email, // Para mostrar en el formulario
+      expiresAt: user.resetPasswordExpires
+    });
+
+  } catch (error) {
+    console.error('Token validation error:', error);
+    return res.status(500).json({ 
+      message: 'Error validating token',
+      valid: false
+    });
+  }
+};
+
+module.exports = { login, requestPasswordReset, resetPassword, validateResetToken };
