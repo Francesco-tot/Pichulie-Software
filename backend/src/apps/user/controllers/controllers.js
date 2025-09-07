@@ -43,7 +43,7 @@ const login = async (req, res) => {
   }
 };
 
-// Configurar el transportador de email
+// Configure email transporter
 const createEmailTransporter = () => {
   return nodemailer.createTransporter({
     service: 'gmail', // Puedes cambiar esto según tu proveedor de email
@@ -54,7 +54,7 @@ const createEmailTransporter = () => {
   });
 };
 
-// Solicitar reset de contraseña
+// Request password reset
 const requestPasswordReset = async (req, res) => {
   try {
     const { email } = req.body;
@@ -66,24 +66,24 @@ const requestPasswordReset = async (req, res) => {
     const user = await User.findOne({ email });
     
     if (!user) {
-      // Por seguridad, no revelamos si el email existe o no
+      // For security, we do not reveal if the email exists or not
       return res.status(200).json({ 
-        message: 'If the email exists, a reset link has been sent' 
+        message: 'A reset link has been sent' 
       });
     }
 
-    // Generar token seguro
+    // Generate a reset token
     const resetToken = crypto.randomBytes(32).toString('hex');
-    
-    // Guardar token y fecha de expiración en la base de datos (1 hora de expiración)
+
+    // Save token and expiration date in the database (1 hour expiration)
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
 
-    // Crear enlace de reset
+    // Create reset link
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset?token=${resetToken}`;
 
-    // Configurar email
+    // Configure email
     const transporter = createEmailTransporter();
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -115,7 +115,7 @@ const requestPasswordReset = async (req, res) => {
   }
 };
 
-// Confirmar reset de contraseña con token
+// Confirm reset password with token
 const resetPassword = async (req, res) => {
   try {
     const { token, newPassword } = req.body;
@@ -132,22 +132,34 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    // Buscar usuario con el token válido y no expirado
-    const user = await User.findOne({
-      resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() }
-    });
+    // Search for user with the token (check all conditions separately)
+    const user = await User.findOne({ resetPasswordToken: token });
 
     if (!user) {
       return res.status(400).json({ 
-        message: 'Invalid or expired reset token' 
+        message: 'Invalid reset token' 
       });
     }
 
-    // Actualizar contraseña y limpiar campos de reset
-    user.password = newPassword; // En producción, deberías hashear la contraseña
+    // Check if token was already used
+    if (user.resetPasswordUsed) {
+      return res.status(400).json({ 
+        message: 'This reset link has already been used' 
+      });
+    }
+
+    // Check if token expired
+    if (Date.now() > user.resetPasswordExpires) {
+      return res.status(400).json({ 
+        message: 'Reset token has expired' 
+      });
+    }
+
+    // Update password and mark token as used
+    user.password = newPassword; // In production, you should hash the password
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
+    user.resetPasswordUsed = true;
     await user.save();
 
     res.status(200).json({ 
@@ -160,7 +172,7 @@ const resetPassword = async (req, res) => {
   }
 };
 
-// Validar token de reset (sin hacer el reset todavía)
+// Validate reset token (without performing the reset yet)
 const validateResetToken = async (req, res) => {
   try {
     const { token } = req.params;
@@ -168,28 +180,50 @@ const validateResetToken = async (req, res) => {
     if (!token) {
       return res.status(400).json({ 
         message: 'Token is required',
-        valid: false
+        valid: false,
+        errorType: 'missing_token'
       });
     }
 
-    // Buscar usuario con el token válido y no expirado
-    const user = await User.findOne({
-      resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() }
-    });
+    // First, find user with this token (regardless of expiration)
+    const user = await User.findOne({ resetPasswordToken: token });
 
     if (!user) {
       return res.status(400).json({ 
-        message: 'Invalid or expired reset token',
-        valid: false
+        message: 'Enlace inválido o caducado',
+        valid: false,
+        errorType: 'invalid_token',
+        canResend: false
       });
     }
 
-    // Token válido - devolver información para el frontend
+    // Check if token was already used
+    if (user.resetPasswordUsed) {
+      return res.status(400).json({ 
+        message: 'Este enlace ya fue utilizado',
+        valid: false,
+        errorType: 'token_used',
+        canResend: true,
+        email: user.email
+      });
+    }
+
+    // Check if token expired
+    if (Date.now() > user.resetPasswordExpires) {
+      return res.status(400).json({ 
+        message: 'Enlace expirado',
+        valid: false,
+        errorType: 'token_expired',
+        canResend: true,
+        email: user.email
+      });
+    }
+
+    // Valid token - return user email for the form
     res.status(200).json({ 
       message: 'Token is valid',
       valid: true,
-      email: user.email, // Para mostrar en el formulario
+      email: user.email,
       expiresAt: user.resetPasswordExpires
     });
 
@@ -197,9 +231,77 @@ const validateResetToken = async (req, res) => {
     console.error('Token validation error:', error);
     return res.status(500).json({ 
       message: 'Error validating token',
-      valid: false
+      valid: false,
+      errorType: 'server_error'
     });
   }
 };
 
-module.exports = { login, requestPasswordReset, resetPassword, validateResetToken };
+// Resend reset token
+const resendResetToken = async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    const user = await User.findOne({ email });
+    
+    if (!user) {
+      // For security, we do not reveal if the email exists or not
+      return res.status(200).json({ 
+        message: 'A new reset link has been sent' 
+      });
+    }
+
+    // Generate a new reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+
+    // Save new token and expiration date, reset the "used" flag
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    user.resetPasswordUsed = false;
+    await user.save();
+
+    // Create reset link "Edit when frontend is ready"
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset?token=${resetToken}`;
+
+    // Configure email
+    const transporter = createEmailTransporter();
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: 'Password Reset Request (Resent) - Pichulie',
+      html: `
+        <h2>Password Reset Request</h2>
+        <p>Hello ${user.name},</p>
+        <p>You requested a new password reset link. Click the link below to reset your password:</p>
+        <p><a href="${resetUrl}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a></p>
+        <p>Or copy and paste this link in your browser:</p>
+        <p>${resetUrl}</p>
+        <p>This link will expire in 1 hour and will replace any previous reset links.</p>
+        <p>If you didn't request this reset, please ignore this email.</p>
+        <br>
+        <p>Best regards,<br>Pichulie Team</p>
+      `
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+    } catch (emailError) {
+      console.error('Email sending error:', emailError);
+      // Continue anyway, token was saved
+    }
+
+    res.status(200).json({ 
+      message: 'If the email exists, a new reset link has been sent' 
+    });
+
+  } catch (error) {
+    console.error('Resend token error:', error);
+    return res.status(500).json({ message: 'Error sending reset email' });
+  }
+};
+
+module.exports = { login, requestPasswordReset, resetPassword, validateResetToken, resendResetToken };

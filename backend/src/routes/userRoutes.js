@@ -1,5 +1,5 @@
 const express = require('express');
-const { login, requestPasswordReset, resetPassword, validateResetToken } = require('../apps/user/controllers/controllers');
+const { login, requestPasswordReset, resetPassword, validateResetToken, resendResetToken } = require('../apps/user/controllers/controllers');
 const loginLimiter = require('../apps/user/middlewares/middlewares');
 
 const router = express.Router();
@@ -12,5 +12,6 @@ router.post('/login', loginLimiter, login);
 router.post('/request-reset', requestPasswordReset);
 router.get('/validate-token/:token', validateResetToken);
 router.post('/reset-password', resetPassword);
+router.post('/resend-reset', resendResetToken);
 
 module.exports = router;

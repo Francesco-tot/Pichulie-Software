@@ -8,7 +8,8 @@ const UserSchema = new Schema(
     "age": { type: Number, required: true},
     "isBlocked": {type: Boolean, default: false},
     "resetPasswordToken": { type: String },
-    "resetPasswordExpires": { type: Date }
+    "resetPasswordExpires": { type: Date },
+    "resetPasswordUsed": { type: Boolean, default: false }
     },
     { timestamps: true } // create createdAt and updatedAt fields automatically
 )
