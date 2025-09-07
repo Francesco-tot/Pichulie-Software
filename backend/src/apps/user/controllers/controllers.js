@@ -8,7 +8,8 @@ require('dotenv').config();
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
+    const user = await User.findOne({ email });
+    
     // Search for the user email in the database
     if (!user) return res.status(401).json({ message: 'Invalid user' });  
 
@@ -44,11 +45,6 @@ const login = async (req, res) => {
   }
 };
 
-// Logout a logged user
-const logout = (req, res) => {
-  res.clearCookie("jwt");
-  res.json({ message: "Logged out" });
-};
 
 // Configure email transporter
 const createEmailTransporter = () => {
