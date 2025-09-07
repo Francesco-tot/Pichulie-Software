@@ -48,7 +48,7 @@ const login = async (req, res) => {
 // Configure email transporter
 const createEmailTransporter = () => {
   return nodemailer.createTransporter({
-    service: 'gmail', // Puedes cambiar esto según tu proveedor de email
+    service: 'gmail',
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS
@@ -68,9 +68,10 @@ const requestPasswordReset = async (req, res) => {
     const user = await User.findOne({ email });
     
     if (!user) {
-      // For security, we do not reveal if the email exists or not
-      return res.status(200).json({ 
-        message: 'A reset link has been sent' 
+      // Security: Use 202 Accepted with generic response to prevent email enumeration
+      return res.status(202).json({ 
+        success: true,
+        message: 'You will receive a reset link'
       });
     }
 
@@ -108,7 +109,8 @@ const requestPasswordReset = async (req, res) => {
     await transporter.sendMail(mailOptions);
 
     res.status(200).json({ 
-      message: 'If the email exists, a reset link has been sent' 
+      success: true,
+      message: 'Reset link sent successfully'
     });
 
   } catch (error) {
@@ -170,7 +172,7 @@ const resetPassword = async (req, res) => {
 
     res.status(200).json({ 
       success: true,
-      message: 'Contraseña actualizada',
+      message: 'Password reset successfully',
       redirectTo: '/login',
       redirectDelay: 500 // milliseconds
     });
@@ -258,9 +260,11 @@ const resendResetToken = async (req, res) => {
     const user = await User.findOne({ email });
     
     if (!user) {
-      // For security, we do not reveal if the email exists or not
-      return res.status(200).json({ 
-        message: 'A new reset link has been sent' 
+      // Security: Use 202 Accepted with generic response to prevent email enumeration
+      return res.status(202).json({ 
+        success: true,
+        message: 'You will receive a reset link',
+        note: 'For security reasons, we do not reveal if the email exists'
       });
     }
 
@@ -304,7 +308,8 @@ const resendResetToken = async (req, res) => {
     }
 
     res.status(200).json({ 
-      message: 'If the email exists, a new reset link has been sent' 
+      success: true,
+      message: 'Nuevo enlace de restablecimiento enviado correctamente'
     });
 
   } catch (error) {
