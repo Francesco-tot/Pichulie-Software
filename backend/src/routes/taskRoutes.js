@@ -24,6 +24,6 @@ router.post('/', authenticateToken, createTask);
 
 // Legacy routes (mantener compatibilidad)
 router.post('/new', authMiddleware, createTask);
-router.get('/legacy', authMiddleware, getTasksByUser);
+router.get('/', authMiddleware, getTasksByUser );
 
 module.exports = router;

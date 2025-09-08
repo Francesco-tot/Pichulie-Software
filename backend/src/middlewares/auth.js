@@ -13,7 +13,10 @@ const authenticateToken = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'Access Token Required'
+        message: 'Access Token Required',
+        errorType: 'missing_token',
+        action: 'redirect_to_login',
+        redirectTo: '/login'
       });
     }
 
@@ -25,14 +28,20 @@ const authenticateToken = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'User Not Found'
+        message: 'User not found',
+        errorType: 'user_not_found',
+        action: 'redirect_to_login',
+        redirectTo: '/login'
       });
     }
 
     if (user.isBlocked) {
       return res.status(423).json({
         success: false,
-        message: 'Account Temporarily Blocked'
+        message: 'Account temporarily blocked',
+        errorType: 'account_blocked',
+        action: 'redirect_to_login',
+        redirectTo: '/login'
       });
     }
 
@@ -48,25 +57,35 @@ const authenticateToken = async (req, res, next) => {
     if (error.name === 'JsonWebTokenError') {
       return res.status(401).json({
         success: false,
-        message: 'Invalid Token'
+        message: 'Invalid token',
+        errorType: 'invalid_token',
+        action: 'redirect_to_login',
+        redirectTo: '/login'
       });
     }
     
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({
         success: false,
-        message: 'Expired Token'
+        message: 'Login session expired',
+        errorType: 'token_expired',
+        action: 'redirect_to_login',
+        redirectTo: '/login',
+        redirectDelay: 1000 
       });
     }
 
     // Log error only in development
     if (process.env.NODE_ENV === 'development') {
       console.error('Auth middleware error:', error);
+      console.error('Stack trace:', error.stack);
+    } else {
+      console.error('Auth middleware error occurred');
     }
 
     return res.status(500).json({
       success: false,
-      message: 'Authentication Error'
+      message: 'Authentication error'
     });
   }
 };
