@@ -13,7 +13,7 @@ const authenticateToken = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'Token de acceso requerido'
+        message: 'Access Token Required'
       });
     }
 
@@ -25,14 +25,14 @@ const authenticateToken = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Usuario no encontrado'
+        message: 'User Not Found'
       });
     }
 
     if (user.isBlocked) {
       return res.status(423).json({
         success: false,
-        message: 'Cuenta temporalmente bloqueada'
+        message: 'Account Temporarily Blocked'
       });
     }
 
@@ -48,14 +48,14 @@ const authenticateToken = async (req, res, next) => {
     if (error.name === 'JsonWebTokenError') {
       return res.status(401).json({
         success: false,
-        message: 'Token inválido'
+        message: 'Invalid Token'
       });
     }
     
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({
         success: false,
-        message: 'Token expirado'
+        message: 'Expired Token'
       });
     }
 
@@ -66,7 +66,7 @@ const authenticateToken = async (req, res, next) => {
 
     return res.status(500).json({
       success: false,
-      message: 'Error de autenticación'
+      message: 'Authentication Error'
     });
   }
 };
