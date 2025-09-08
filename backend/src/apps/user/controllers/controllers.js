@@ -341,4 +341,4 @@ const resendResetToken = async (req, res) => {
   }
 };
 
-module.exports = { login, logout, requestPasswordReset, resetPassword, validateResetToken, resendResetToken };
+module.exports = { login, requestPasswordReset, resetPassword, validateResetToken, resendResetToken };
