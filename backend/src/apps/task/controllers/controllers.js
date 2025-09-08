@@ -1,39 +1,38 @@
 const Task = require('../models/models');
 
 /**
- * Helper function for consistent error handling
+ * Helper function for consistent error handling in development mode
  */
 const handleServerError = (error, context, res) => {
   if (process.env.NODE_ENV === 'development') {
-    console.error(`❌ ${context} error:`, error);
+    console.error(`${context} error:`, error);
     console.error('Stack trace:', error.stack);
   } else {
-    console.error(`❌ ${context} error occurred`);
+    console.error(`${context} error occurred`);
   }
   
   return res.status(500).json({ 
     success: false,
-    message: 'Inténtalo de nuevo más tarde',
+    message: 'Try it again later',
     error: process.env.NODE_ENV === 'development' ? error.message : undefined
   });
 };
 
 /**
  * GET /tasks
- * Obtener todas las tareas del usuario autenticado
- * Optimizado para responder en ≤ 500ms
+ * Get all tasks of the authenticated user
  */
 const getUserTasks = async (req, res) => {
   const startTime = Date.now();
   
   try {
-    // Obtener parámetros de consulta para filtros opcionales
+    // Get query parameters for optional filters
     const { status, date, limit = 50, page = 1 } = req.query;
     
-    // Construir filtro base (solo tareas del usuario)
+    // Build base filter (only user tasks)
     const filter = { user_id: req.user.id };
     
-    // Agregar filtros opcionales
+    // Add additional filters
     if (status && ['to do', 'in process', 'finished'].includes(status)) {
       filter.status = status;
     }
@@ -41,7 +40,7 @@ const getUserTasks = async (req, res) => {
     if (date) {
       const targetDate = new Date(date);
       if (!isNaN(targetDate.getTime())) {
-        // Filtrar por día específico
+        // Filter by day
         const startOfDay = new Date(targetDate);
         startOfDay.setHours(0, 0, 0, 0);
         const endOfDay = new Date(targetDate);
@@ -54,25 +53,24 @@ const getUserTasks = async (req, res) => {
       }
     }
 
-    // Configurar paginación
+    // Set pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
     
-    // Optimización: usar lean() para mejor rendimiento
-    // Ordenar por fecha de tarea (más recientes primero)
+    //Sort by task date (most recent first)
     const tasks = await Task.find(filter)
-      .lean() // Retorna objetos JS planos, más rápido
+      .lean() // Returns flat JS objects 
       .sort({ task_date: -1, createdAt: -1 })
       .limit(parseInt(limit))
       .skip(skip);
 
-    // Obtener conteo total para paginación (solo si es necesario)
+    // Get total count for pagination (only if needed)
     const totalTasks = await Task.countDocuments(filter);
     
     const responseTime = Date.now() - startTime;
     
     res.status(200).json({
       success: true,
-      message: 'Tareas obtenidas exitosamente',
+      message: 'Tasks successfully found',
       data: {
         tasks,
         pagination: {
