@@ -20,7 +20,7 @@ router.post('/login', loginLimiter, login);
  * @description Creates a new user account with provided information.
  */
 //Register route
-router.post('/register', register);
+// router.post('/register', register);
 
 // Routes for password reset
 /**
