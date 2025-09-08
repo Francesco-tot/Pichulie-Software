@@ -1,4 +1,32 @@
-const User = require('../models/models');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: controllers/controllers.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: controllers/controllers.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const User = require('../models/models');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
@@ -207,16 +235,16 @@ const requestPasswordReset = async (req, res) => {
       to: user.email,
       subject: 'Password Reset Request - Pichulie',
       html: `
-        <h2>Password Reset Request</h2>
-        <p>Hello ${user.name},</p>
-        <p>You requested a password reset. Click the link below to reset your password:</p>
-        <p><a href="${resetUrl}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a></p>
-        <p>Or copy and paste this link in your browser:</p>
-        <p>${resetUrl}</p>
-        <p>This link will expire in 1 hour.</p>
-        <p>If you didn't request this reset, please ignore this email.</p>
-        <br>
-        <p>Best regards,<br>Pichulie Team</p>
+        &lt;h2>Password Reset Request&lt;/h2>
+        &lt;p>Hello ${user.name},&lt;/p>
+        &lt;p>You requested a password reset. Click the link below to reset your password:&lt;/p>
+        &lt;p>&lt;a href="${resetUrl}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password&lt;/a>&lt;/p>
+        &lt;p>Or copy and paste this link in your browser:&lt;/p>
+        &lt;p>${resetUrl}&lt;/p>
+        &lt;p>This link will expire in 1 hour.&lt;/p>
+        &lt;p>If you didn't request this reset, please ignore this email.&lt;/p>
+        &lt;br>
+        &lt;p>Best regards,&lt;br>Pichulie Team&lt;/p>
       `
     };
 
@@ -270,7 +298,7 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    if (newPassword.length < 6) {
+    if (newPassword.length &lt; 6) {
       return res.status(400).json({ 
         message: 'Password must be at least 6 characters long' 
       });
@@ -504,16 +532,16 @@ const resendResetToken = async (req, res) => {
       to: user.email,
       subject: 'Password Reset Request (Resent) - Pichulie',
       html: `
-        <h2>Password Reset Request</h2>
-        <p>Hello ${user.name},</p>
-        <p>You requested a new password reset link. Click the link below to reset your password:</p>
-        <p><a href="${resetUrl}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a></p>
-        <p>Or copy and paste this link in your browser:</p>
-        <p>${resetUrl}</p>
-        <p>This link will expire in 1 hour and will replace any previous reset links.</p>
-        <p>If you didn't request this reset, please ignore this email.</p>
-        <br>
-        <p>Best regards,<br>Pichulie Team</p>
+        &lt;h2>Password Reset Request&lt;/h2>
+        &lt;p>Hello ${user.name},&lt;/p>
+        &lt;p>You requested a new password reset link. Click the link below to reset your password:&lt;/p>
+        &lt;p>&lt;a href="${resetUrl}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password&lt;/a>&lt;/p>
+        &lt;p>Or copy and paste this link in your browser:&lt;/p>
+        &lt;p>${resetUrl}&lt;/p>
+        &lt;p>This link will expire in 1 hour and will replace any previous reset links.&lt;/p>
+        &lt;p>If you didn't request this reset, please ignore this email.&lt;/p>
+        &lt;br>
+        &lt;p>Best regards,&lt;br>Pichulie Team&lt;/p>
       `
     };
 
@@ -534,4 +562,27 @@ const resendResetToken = async (req, res) => {
   }
 };
 
-module.exports = { login, requestPasswordReset, resetPassword, validateResetToken, resendResetToken };
+module.exports = { login, logout, requestPasswordReset, resetPassword, validateResetToken, resendResetToken };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#UserSchema">UserSchema</a></li><li><a href="global.html#createEmailTransporter">createEmailTransporter</a></li><li><a href="global.html#handleServerError">handleServerError</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#requestPasswordReset">requestPasswordReset</a></li><li><a href="global.html#resendResetToken">resendResetToken</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#validateResetToken">validateResetToken</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Sep 07 2025 22:54:45 GMT-0500 (hora estándar de Colombia)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

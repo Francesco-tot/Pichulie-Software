@@ -5,7 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "doc": "jsdoc -c jsdoc.json"
   },
   "keywords": [],
   "author": "",
@@ -23,5 +24,8 @@
     "mongoose": "^8.18.0",
     "nodemailer": "^7.0.6",
     "nodemon": "^3.1.10"
+  },
+  "devDependencies": {
+    "jsdoc": "^4.0.4"
   }
 }
