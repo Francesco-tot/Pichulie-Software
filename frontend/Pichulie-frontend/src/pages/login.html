@@ -8,29 +8,33 @@
 </head>
 <body>
   <div class="auth-container">
-    <div class="brand">
-      <img src="assets/logo.png" alt="logo">
-      <h3>Pichulie</h3>
+    
+    <div class="auth-left">
+      <div class="branding">
+        <img src="../../public/logo.png" alt="Pichulie logo" class="logo">
+        <img src="../../public/calendar.png" alt="calendar icon" class="calendar">
+      </div>
     </div>
-    <div class="calendar-icon">
-      <img src="assets/calendar.png" alt="calendar icon">
+
+    <div class="auth-right">
+      <h1>Welcome Back</h1>
+      <form>
+        <input type="text" placeholder="Email / Username" required>
+        <input type="password" placeholder="Password" required>
+        <div class="checkbox-row">
+          <label><input type="checkbox"> Remember me</label>
+          <a href="recovery.html">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn">Login</button>
+        <div class="separator">or</div>
+        <div class="google-btn">
+          <img src="../../public/google.png" alt="Google logo"> Login with Google
+        </div>
+        <div class="footer-text">
+          Don’t have an account? <a href="register.html">Sign up</a>
+        </div>
+      </form>
     </div>
-    <h2>Welcome Back</h2>
-    <form>
-      <input type="text" placeholder="Email / Username" required>
-      <input type="password" placeholder="Password" required>
-      <div class="checkbox-row">
-        <label><input type="checkbox"> Remember me</label>
-        <a href="recovery.html">Forgot password?</a>
-      </div>
-      <button type="submit" class="btn">Login</button>
-      <div class="google-btn">
-        <img src="assets/google.png" alt="Google logo"> Login with Google
-      </div>
-      <div class="footer-text">
-        Don’t have an account? <a href="register.html">Sign up</a>
-      </div>
-    </form>
   </div>
 </body>
 </html>

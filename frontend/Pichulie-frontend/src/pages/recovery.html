@@ -1,25 +1,33 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Password Recovery - Pichulie</title>
+  <title>Login - Pichulie</title>
   <link rel="stylesheet" href="../styles/style.css">
 </head>
 <body>
   <div class="auth-container">
-    <div class="brand">
-      <img src="assets/logo.png" alt="logo">
-      <h3>Pichulie</h3>
+    
+    <!-- Columna izquierda -->
+    <div class="auth-left">
+      <div class="branding">
+        <img src="../../public/logo.png" alt="Pichulie logo" class="logo">
+        <img src="../../public/calendar.png" alt="calendar icon" class="calendar">
+      </div>
     </div>
-    <div class="calendar-icon">
-      <img src="assets/calendar.png" alt="calendar icon">
+
+    <!-- Columna derecha -->
+    <div class="auth-right">
+      <h1>Password Recovery</h1>
+      <form>
+        <input type="text" placeholder="Email / Username" required>
+        <button type="submit" class="btn">Send link</button>
+      </form>
     </div>
-    <h2>Password Recovery</h2>
-    <form>
-      <input type="text" placeholder="Email / Username" required>
-      <button type="submit" class="btn">Send link</button>
-    </form>
   </div>
 </body>
 </html>
+
+
