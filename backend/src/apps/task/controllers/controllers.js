@@ -1,7 +1,31 @@
 const Task = require('../models/models');
 
+// Helper function for error handling
 /**
- * Helper function for consistent error handling in development mode
+ * Server error handler utility function
+ * 
+ * Centralized error handling function that manages server errors with
+ * environment-aware logging and consistent client responses. Provides
+ * detailed error information in development while maintaining security
+ * in production by hiding sensitive error details.
+ * 
+ * Error handling behavior:
+ * - **Development mode**: Logs full error details including stack trace to console
+ * - **Production mode**: Logs only generic error occurrence without sensitive details
+ * - **Client response**: Always returns generic message to prevent information leakage
+ * - **Error details**: Included in response only in development environment
+ * 
+ * Security:
+ * - Prevents sensitive error information from being exposed to clients in production
+ * - Logs detailed errors only in development for debugging purposes
+ * - Maintains consistent error response structure across all endpoints
+ * 
+ * Performance:
+ * - Minimal overhead as it only performs console logging and JSON response
+ * - Conditional logging based on environment reduces production log noise
+ * 
+ * @see {@link https://expressjs.com/en/guide/error-handling.html} Express Error Handling
+ * @see {@link https://nodejs.org/api/errors.html} Node.js Error Documentation
  */
 const handleServerError = (error, context, res) => {
   if (process.env.NODE_ENV === 'development') {
@@ -19,8 +43,26 @@ const handleServerError = (error, context, res) => {
 };
 
 /**
- * GET /tasks
- * Get all tasks of the authenticated user
+ * Get user tasks controller
+ * 
+ * Retrieves filtered and paginated tasks for the authenticated user with optional
+ * query parameters for filtering by status, date, and pagination. Implements
+ * performance monitoring and comprehensive filtering capabilities.
+ * 
+ * Task retrieval flow:
+ * 1. Starts performance timer for request monitoring
+ * 2. Extracts and validates query parameters with defaults
+ * 3. Builds base filter for user-specific tasks (user_id)
+ * 4. Applies optional status filter with validation
+ * 5. Applies optional date filter with day-range calculation
+ * 6. Executes database query with constructed filters
+ * 7. Implements pagination with limit and skip
+ * 8. Returns filtered tasks with metadata
+ * 
+ * @see {@link https://docs.mongodb.com/manual/tutorial/query-documents/} MongoDB Query Documentation
+ * @see {@link https://mongoosejs.com/docs/queries.html} Mongoose Query Documentation
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date} JavaScript Date Object
+ * 
  */
 const getUserTasks = async (req, res) => {
   const startTime = Date.now();
@@ -93,6 +135,26 @@ const getUserTasks = async (req, res) => {
   }
 };
 
+/**
+ * Create task controller
+ * 
+ * Creates a new task for the authenticated user with provided task details.
+ * Automatically associates the task with the authenticated user and handles
+ * task creation with comprehensive error handling and validation.
+ * 
+ * Task creation flow:
+ * 1. Extracts task details from request body
+ * 2. Creates new Task instance with provided data
+ * 3. Automatically assigns authenticated user ID to task
+ * 4. Validates task data against schema requirements
+ * 5. Saves new task to database
+ * 6. Returns success response with created task details
+ * 7. Handles errors with environment-aware logging
+ * 
+ * @see {@link https://mongoosejs.com/docs/validation.html} Mongoose Validation
+ * @see {@link https://mongoosejs.com/docs/middleware.html} Mongoose Middleware
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/201} HTTP 201 Created
+ */
 const createTask = async (req, res) => {
   try {
     const { title, detail, status, task_date } = req.body;
@@ -119,6 +181,25 @@ const createTask = async (req, res) => {
   }
 };
 
+/**
+ * Get tasks by user with grouping controller
+ * 
+ * Retrieves all tasks for the authenticated user, sorts them by specified criteria,
+ * and groups them by status for organized display. Provides a structured view
+ * of user tasks organized by their current status with flexible sorting options.
+ * 
+ * Task retrieval and grouping flow:
+ * 1. Determines sort criteria from query parameter (title or task_date)
+ * 2. Retrieves all tasks for authenticated user with sorting applied
+ * 3. Groups tasks by status using Array.reduce method
+ * 4. Creates organized structure with tasks categorized by status
+ * 5. Returns grouped tasks in structured response format
+ * 6. Handles errors with environment-aware logging
+ * 
+ * @see {@link https://docs.mongodb.com/manual/reference/method/cursor.sort/} MongoDB Sort Documentation
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce} Array.reduce() Documentation
+ * @see {@link https://mongoosejs.com/docs/api.html#query_Query-sort} Mongoose Sort Documentation
+ */
 const getTasksByUser = async (req, res) => {
   try {
     // Sort by title by default and by title if specified
