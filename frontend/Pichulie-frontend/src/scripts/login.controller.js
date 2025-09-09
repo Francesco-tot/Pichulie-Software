@@ -22,11 +22,15 @@ document.getElementById("login").addEventListener("click",async function () {
         }
 
         let data = await response.json()
-      
-        
+
+        localStorage.setItem("token", data.token);
+
+        document.getElementById("resultado").innerText = "Bienvenido " + data.user.name;
+
+        window.location.href = "dashboard.html"; // Ajustar a view principal
 
     } catch (error) {
-        
+        alert(error.message);
       }
     
 })
