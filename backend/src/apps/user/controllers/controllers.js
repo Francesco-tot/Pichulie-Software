@@ -51,6 +51,79 @@ const handleServerError = (error, context, res) => {
 };
 
 /**
+ * User registration controller
+ * 
+ * Handles new user account creation with comprehensive validation and security measures.
+ * Validates all required fields, enforces password requirements, prevents duplicate accounts,
+ * and securely stores user data with bcrypt password hashing.
+ * 
+ * Registration validation flow:
+ * 1. Extracts all required fields from request body
+ * 2. Validates that all fields are provided (email, password, passwordCheck, name, age)
+ * 3. Enforces minimum password length (6 characters)
+ * 4. Verifies password and passwordCheck match exactly
+ * 5. Checks email uniqueness against existing users
+ * 6. Hashes password securely using bcrypt with 10 salt rounds
+ * 7. Creates new user document with hashed password
+ * 8. Saves user to database and returns success response with user ID
+ * 
+ * **Security Features:**
+ * - Password confirmation validation prevents typos
+ * - Minimum password length enforcement (6 characters)
+ * - Secure bcrypt hashing with 10 salt rounds
+ * - Email uniqueness validation to prevent duplicates
+ * - No plaintext password storage
+ * - Structured error responses with appropriate HTTP status codes
+ * 
+ * @see {@link https://www.npmjs.com/package/bcrypt} bcrypt Documentation
+ */
+const register = async (req, res) => {
+  try {
+    const {email, password, passwordCheck, name, age} = req.body;
+
+    //Status code 400: Bad request
+    //Status code 500: Server error
+    //Status code 409: Conflict
+
+    //Checking if all fields are filled
+    if (!email || !password || !passwordCheck || !name || !age) {
+      return res.status(400).json({ message: 'Not all fields have been entered.' });
+    }
+
+    //Checking password length and match
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+    }
+    if (password !== passwordCheck) {
+      return res.status(400).json({ message: 'Passwords do not match. Please try again' });
+    }
+
+    //Checking if email already exists
+    const existingEmail = await User.findOne({ email: email });
+    if (existingEmail) {
+      return res.status(409).json({ message: 'An account with this email already exists' });
+    }
+
+    //Hashing the password with bcrypt (10 salt rounds)
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    //Creating the new user (saving hashed password, not plain text)
+    const newUser = new User({
+      email: email,
+      password: hashedPassword,
+      name: name,
+      age: age
+    });
+    const savedUser = await newUser.save();
+    res.status(201).json({ message: 'User registered successfully', userId: savedUser._id });
+  }
+  catch (error) {
+    return handleServerError(error, 'Registration', res);
+  }
+};
+
+/**
  * User login controller
  * 
  * Authenticates a user by validating email and password credentials.
@@ -534,4 +607,4 @@ const resendResetToken = async (req, res) => {
   }
 };
 
-module.exports = { login, requestPasswordReset, resetPassword, validateResetToken, resendResetToken };
+module.exports = { login, requestPasswordReset, resetPassword, validateResetToken, resendResetToken, register };

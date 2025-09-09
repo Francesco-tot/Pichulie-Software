@@ -46,6 +46,7 @@ const notFoundHandler = (req, res) => {
     method: req.method,
     availableEndpoints: [
       'POST /api/users/login',
+      'POST /api/users/register',
       'POST /api/users/request-reset',
       'GET /api/users/validate-token/:token',
       'POST /api/users/reset-password',
