@@ -3,6 +3,23 @@ const attempts = {}; // { ip: { count, firstAttempt } }
 const MAX_ATTEMPTS = 5;            // Max 5 tries
 const WINDOW_TIME = 10 * 60 * 1000; // 10 minutes in ms
 
+/**
+ * Login rate limiting middleware
+ * 
+ * Implements rate limiting for login attempts to prevent brute force attacks.
+ * Tracks login attempts per IP address within a sliding time window and
+ * blocks requests that exceed the maximum allowed attempts.
+ * 
+ * **Security Features:**
+ * - IP-based tracking prevents brute force attacks
+ * - Sliding time window provides flexible rate limiting
+ * - Automatic cleanup when time window expires
+ * - Memory-based storage for fast lookup
+ * - Configurable limits through constants
+ * 
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429} HTTP 429 Too Many Requests
+ * @see {@link https://expressjs.com/en/guide/behind-proxies.html} Express Behind Proxies
+ */
 const loginLimiter = (req, res, next) => {
     const ip = req.ip;
 
