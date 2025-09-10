@@ -1,54 +1,10 @@
 const User = require('../models/models');
+const handleServerError = require('../../../middlewares/errorHandler');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
-
-// Helper function for error handling
-/**
- * Server error handler utility function
- * 
- * Centralized error handling function that manages server errors with
- * environment-aware logging and consistent client responses. Provides
- * detailed error information in development while maintaining security
- * in production by hiding sensitive error details.
- * 
- * Error handling behavior:
- * - **Development mode**: Logs full error details including stack trace to console
- * - **Production mode**: Logs only generic error occurrence without sensitive details
- * - **Client response**: Always returns generic message to prevent information leakage
- * - **Error details**: Included in response only in development environment
- * 
- * Security:
- * - Prevents sensitive error information from being exposed to clients in production
- * - Logs detailed errors only in development for debugging purposes
- * - Maintains consistent error response structure across all endpoints
- * 
- * Performance:
- * - Minimal overhead as it only performs console logging and JSON response
- * - Conditional logging based on environment reduces production log noise
- * 
- * @see {@link https://expressjs.com/en/guide/error-handling.html} Express Error Handling
- * @see {@link https://nodejs.org/api/errors.html} Node.js Error Documentation
- */
-const handleServerError = (error, context, res) => {
-  // Log error details only in development mode
-  if (process.env.NODE_ENV === 'development') {
-    console.error(`${context} error:`, error);
-    console.error('Stack trace:', error.stack);
-  } else {
-    // In production, log only essential info without sensitive details
-    console.error(`${context} error occurred`);
-  }
-  
-  // Always return generic message to users
-  return res.status(500).json({ 
-    success: false,
-    message: 'Try it again later',
-    error: process.env.NODE_ENV === 'development' ? error.message : undefined
-  });
-};
 
 /**
  * User registration controller
@@ -90,10 +46,25 @@ const register = async (req, res) => {
       return res.status(400).json({ message: 'Not all fields have been entered.' });
     }
 
-    //Checking password length and match
-    if (password.length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+    // Cheking age limits
+    if (age < 13) {
+      return res.status(400).json({ message: 'You must be at least 13 years old to register' });
     }
+
+    if (age > 122) {
+      return res.status(400).json({ message: 'Please enter a valid age' });
+    }
+
+    //Checking password length and match
+    if (password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({ message: 'Password must contain at least one uppercase letter, one lowercase letter, and one number.' });
+    }
+
     if (password !== passwordCheck) {
       return res.status(400).json({ message: 'Passwords do not match. Please try again' });
     }
@@ -346,10 +317,17 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    if (newPassword.length < 6) {
+    if (newPassword.length < 8) {
       return res.status(400).json({ 
-        message: 'Password must be at least 6 characters long' 
+        message: 'Password must be at least 8 characters long' 
       });
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
+    if (!passwordRegex.test(newPassword)) {
+      return res.status(400).json({ 
+        message: 'Password must contain at least one uppercase letter, one lowercase letter, and one number.' 
+     });
     }
 
     // Search for user with the token (check all conditions separately)

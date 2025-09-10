@@ -1,6 +1,6 @@
 const express = require('express');
-const { createTask, getTasksByUser, getUserTasks } = require('../apps/task/controllers/controllers');
-const authMiddleware = require('../apps/task/middlewares/middlewares');
+const { createTask, getUserTasks } = require('../apps/task/controllers/controllers');
+//const authMiddleware = require('../apps/task/middlewares/middlewares');
 const { authenticateToken } = require('../middlewares/auth');
 
 const router = express.Router();
@@ -15,15 +15,11 @@ const router = express.Router();
 router.get('/', authenticateToken, getUserTasks);
 
 /**
- * @route POST /tasks
+ * @route POST /tasks/new
  * @group Tasks - Task management operations
  * @summary Create a new task
  * @security JWT
  */
-router.post('/', authenticateToken, createTask);
-
-// Legacy routes (mantener compatibilidad)
-router.post('/new', authMiddleware, createTask);
-router.get('/', authMiddleware, getTasksByUser );
+router.post('/new', authenticateToken, createTask);
 
 module.exports = router;

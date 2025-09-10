@@ -11,7 +11,7 @@ const router = express.Router();
  * @description Authenticates a user with email and password. Includes rate limiting to prevent brute force attacks.
  */
 // Login route
-router.post('/login', login); // LoginTime disable
+router.post('/login', loginLimiter, login); // LoginTime disable
 
 /**
  * @route POST /register
@@ -30,6 +30,7 @@ router.post('/login', login); // LoginTime disable
  * @description Initiates password reset process by sending a reset token to user's email.
  */
 router.post('/request-reset', requestPasswordReset);
+
 /**
  * @route GET /validate-token/:token
  * @group Password Reset - Password reset operations
@@ -37,6 +38,7 @@ router.post('/request-reset', requestPasswordReset);
  * @description Validates if a password reset token is valid and not expired.
  */
 router.get('/validate-token/:token', validateResetToken);
+
 /**
  * @route POST /reset-password
  * @group Password Reset - Password reset operations
@@ -44,6 +46,7 @@ router.get('/validate-token/:token', validateResetToken);
  * @description Resets user password using a valid reset token.
  */
 router.post('/reset-password', resetPassword);
+
 /**
  * @route POST /reset-password
  * @group Password Reset - Password reset operations
