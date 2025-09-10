@@ -173,6 +173,7 @@ const login = async (req, res) => {
         email: user.email,
       },
     });
+    //console.log(user.name)
   } catch (error) {
     return handleServerError(error, 'Login', res);
   }
@@ -203,7 +204,7 @@ const login = async (req, res) => {
  * @see {@link https://nodemailer.com/smtp/gmail/} Nodemailer Gmail Configuration
  */
 const createEmailTransporter = () => {
-  return nodemailer.createTransporter({
+  return nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: process.env.EMAIL_USER,
@@ -268,13 +269,14 @@ const requestPasswordReset = async (req, res) => {
     // Save token and expiration date in the database (1 hour expiration)
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    user.resetPasswordUsed = false;
     await user.save();
 
     // Create reset link
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset?token=${resetToken}`;
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/src/pages/new-password.html?token=${resetToken}`;
 
     // Configure email
-    const transporter = createEmailTransporter();
+    const transporter = createEmailTransporter();//createEmailTransporter();
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: user.email,
@@ -301,6 +303,7 @@ const requestPasswordReset = async (req, res) => {
     });
 
   } catch (error) {
+    console.error("Error al enviar el correo:", error);
     return handleServerError(error, 'Password reset request', res);
   }
 };

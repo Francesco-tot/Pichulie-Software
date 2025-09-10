@@ -21,13 +21,13 @@
     <div class="auth-right">
       <h1>Welcome</h1>
       <form>
-        <input type="text" placeholder="Name" required>
-        <input type="text" placeholder="Last name" required>
-        <input type="email" placeholder="Email" required>
-        <input type="number" placeholder="Age" required>
-        <input type="password" placeholder="Password" required>
-        <input type="password" placeholder="Confirm password" required>
-        <button type="submit" class="btn">Register</button>
+        <input type="text" id ="name" placeholder="Name" required>
+        <!-- <input type="text" id="last-name" placeholder="Last name" required> -->
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="number" id="age" placeholder="Age" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <input type="password" id = "passwordCheck" placeholder="Confirm password" required>
+        <button id="register" type="button" class="btn">Register</button>
 
         <div class="google-btn">
           <img src="../../public/google.png" alt="Google logo"> Continue with Google
@@ -39,6 +39,7 @@
       </form>
     </div>
   </div>
+  <script src="../scripts/register.controller.js"></script>
 </body>
 </html>
 

@@ -1,23 +1,29 @@
 
-document.getElementById("login").addEventListener("click",async function () {
+document.getElementById("login").addEventListener("click",async function (e) {
+    e.preventDefault();
 
     let email = document.getElementById("email").value;
     let password = document.getElementById("password").value;
 
     try {
         
-        let response = await fetch("http://localhost:8000/api/users/login/", {
+        let response = await fetch("http://localhost:3000/api/users/login", {
             method: "POST",
             headers: {
               "Content-Type": "application/json"
             },
             body: JSON.stringify({
-              email: email,
-              password: password
+              email,password
             })
           });
-          
+
+        if (response.status === 401) {
+            alert("Correo o contraseña incorrectos");
+            return; // salir de la función
+        }
+
         if (!response.ok) {
+            //document.getElementById("resultado").innerText = "";
             throw new Error("Error en la petición: " + response.status);
         }
 
@@ -25,9 +31,9 @@ document.getElementById("login").addEventListener("click",async function () {
 
         localStorage.setItem("token", data.token);
 
-        document.getElementById("resultado").innerText = "Bienvenido " + data.user.name;
+        //document.getElementById("resultado").innerText = "Bienvenido " + data.user.name;
 
-        window.location.href = "dashboard.html"; // Ajustar a view principal
+        window.location.href = "/src/pages/dashboard.html"; // Ajustar a view principal
 
     } catch (error) {
         alert(error.message);
