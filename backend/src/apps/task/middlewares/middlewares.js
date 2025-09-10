@@ -20,6 +20,8 @@
  * @see {@link https://www.npmjs.com/package/jsonwebtoken} jsonwebtoken Library
  * @see {@link https://tools.ietf.org/html/rfc6750} Bearer Token RFC
  */
+
+/*
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers["authorization"];
 
