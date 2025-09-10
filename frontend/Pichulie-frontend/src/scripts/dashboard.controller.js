@@ -1,9 +1,3 @@
-const token = localStorage.getItem("token");
-if (!token) {
-  // No está logueado → redirigir al login
-  window.location.href = "index.html";
-}
-
 class TaskManager {
   constructor() {
     this.tasks = {
@@ -26,40 +20,30 @@ class TaskManager {
   }
 
   // backend
-  async loadTasks() {
+  loadTasks() {
     try {
-      const res = await fetch("http://localhost:3000/api/task", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
-      const data = await res.json()
+      const savedTasks = localStorage.getItem("taskManagerTasks")
+      if (savedTasks) {
+        this.tasks = JSON.parse(savedTasks)
+      }
 
-      this.tasks = {
-        todo: data.tasks?.["to do"] || [],
-        inprocess: data.tasks?.["in process"] || [],
-        finished: data.tasks?.["finished"] || [],
+      const savedTrash = localStorage.getItem("taskManagerTrash")
+      if (savedTrash) {
+        this.trashedTasks = JSON.parse(savedTrash)
       }
 
       this.renderTasks()
     } catch (err) {
-      console.error("Error cargando tareas:", err)
+      console.error("Error loading tasks:", err)
     }
   }
 
-  async saveTaskToBackend(task) {
+  saveTasksToStorage() {
     try {
-      const res = await fetch("http://localhost:3000/api/task", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(task),
-      })
-      return await res.json()
+      localStorage.setItem("taskManagerTasks", JSON.stringify(this.tasks))
+      localStorage.setItem("taskManagerTrash", JSON.stringify(this.trashedTasks))
     } catch (err) {
-      console.error("Error creando tarea:", err)
+      console.error("Error saving tasks:", err)
     }
   }
 
@@ -116,24 +100,48 @@ class TaskManager {
     const date = document.getElementById("taskDate").value
     const description = document.getElementById("taskDescription").value.trim()
     const reminder = document.getElementById("taskReminder").checked
-
+  
     if (!title) {
       alert("Please enter a task title")
       return
     }
-
-    const backendTask = {
+  
+    const newTask = {
       title,
       detail: description,
       status: "to do",
       task_date: date,
       remember: reminder,
     }
-
-    await this.saveTaskToBackend(backendTask)
-    await this.loadTasks()
-    this.closeModal()
+  
+    try {
+      const response = await fetch("http://localhost:3000/api/task/new", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(newTask),
+      })
+  
+      if (!response.ok) {
+        throw new Error("Error creating task")
+      }
+  
+      const result = await response.json()
+  
+      this.tasks.todo.push(result.task)
+  
+      this.saveTasksToStorage()
+      this.renderTasks()
+      this.closeModal()
+  
+    } catch (err) {
+      console.log("Error saving task:", err)
+      alert("Error creating task, try again later")
+    }
   }
+  
 
   formatTime(time24) {
     if (!time24) return ""
@@ -167,7 +175,7 @@ class TaskManager {
             </div>
             <div class="task-meta">
                 ${task.remember ? '<span class="task-reminder">Remember</span>' : ""}
-                ${task.time ? `<span class="task-time">${task.time}</span>` : ""}
+                ${task.time ? `<span class="task-time">${this.formatTime(task.time)}</span>` : ""}
                 ${task.remember ? '<span class="task-check">🔔</span>' : ""}
             </div>
         `

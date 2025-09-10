@@ -113,7 +113,7 @@ const createTask = async (req, res) => {
     });
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
-      console.error('Task creation error:', error);
+      console.log('Task creation error:', error);
     }
     res.status(500).json({ message: 'Try again later' });
   }
