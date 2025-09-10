@@ -4,7 +4,7 @@ const cors = require("cors");
 const app = express();
 
 const { connectDB } = require("./src/config/db.js")
-const routes = require("./src/routes/routes")
+const routes = require("./src/routes/routes.js") // add .js extension to specify it is the script
 const { globalErrorHandler, notFoundHandler } = require("./src/middlewares/errorHandler")
 
 const PORT = 3000;

@@ -11,7 +11,7 @@ const router = express.Router();
  * @description Authenticates a user with email and password. Includes rate limiting to prevent brute force attacks.
  */
 // Login route
-router.post('/login', loginLimiter, login);
+router.post('/login', login); // LoginTime disable
 
 /**
  * @route POST /register

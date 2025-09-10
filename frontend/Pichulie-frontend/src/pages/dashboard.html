@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pichulie</title>
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- User Profile -->
+            <div class="user-profile">
+                <div class="avatar">
+                    <img src="img" alt="User Avatar">
+                </div>
+                <div class="user-info">
+                    <div class="user-name">Juan Francesco</div>
+                    <div class="user-surname">García Vargas</div>
+                    <div class="settings-icon">⚙️</div>
+                </div>
+                <div class="logout">
+                    <span class="logout-icon"></span>
+                    <span>Log out</span>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="nav-menu">
+                <button class="nav-item">
+                    <div class="nav-icon search-icon">img</div>
+                    <span>Search by date</span>
+                </button>
+
+                <button class="nav-item">
+                    <div class="nav-icon calendar-icon">img</div>
+                    <span>See all tasks</span>
+                </button>
+
+                <button class="nav-item">
+                    <div class="nav-icon trash-icon">img</div>
+                    <span>Trash</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Default Task Board View -->
+            <div id="taskBoardView" class="content-view active">
+                <!-- Header -->
+                <header class="header">
+                    <h1 class="date-title">Wednesday - Today</h1>
+                </header>
+
+                <!-- Task Columns -->
+                <div class="task-board">
+                    <!-- To Do Column -->
+                    <div class="task-column">
+                        <h2 class="column-title">To do</h2>
+                        <div class="task-list" data-column="todo">
+                            <!-- Removed example task card -->
+                        </div>
+                    </div>
+
+                    <!-- In Process Column -->
+                    <div class="task-column">
+                        <h2 class="column-title">In process</h2>
+                        <div class="task-list" data-column="inprocess">
+                            <!-- Removed example task card -->
+                        </div>
+                    </div>
+
+                    <!-- Finished Column -->
+                    <div class="task-column">
+                        <h2 class="column-title">Finished</h2>
+                        <div class="task-list" data-column="finished">
+                            <!-- Removed example task card -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Task Button -->
+                <button class="add-task-main">
+                    <span class="add-task-icon">+</span>
+                    <span>Add Task</span>
+                </button>
+
+                <!-- Date Navigator -->
+                <div class="date-navigator">
+                    <button class="nav-arrow prev">‹</button>
+                    <div class="date-display">
+                        <div class="month">June</div>
+                        <div class="year">2024</div>
+                        <div class="day">01</div>
+                    </div>
+                    <button class="nav-arrow next">›</button>
+                </div>
+            </div>
+
+            <!-- See All Tasks View -->
+            <div id="allTasksView" class="content-view">
+                <header class="header">
+                    <h1 class="date-title">All Tasks</h1>
+                </header>
+                
+                <div class="all-tasks-container">
+                    <div class="task-section">
+                        <h3 class="section-title">To Do Tasks</h3>
+                        <div class="task-list-all" data-section="todo"></div>
+                    </div>
+                    
+                    <div class="task-section">
+                        <h3 class="section-title">In Process Tasks</h3>
+                        <div class="task-list-all" data-section="inprocess"></div>
+                    </div>
+                    
+                    <div class="task-section">
+                        <h3 class="section-title">Finished Tasks</h3>
+                        <div class="task-list-all" data-section="finished"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trash View -->
+            <div id="trashView" class="content-view">
+                <header class="header">
+                    <h1 class="date-title">Trash</h1>
+                </header>
+                
+                <div class="trash-container">
+                    <div class="trash-empty-state">
+                        <div class="trash-icon-large">🗑️</div>
+                        <h3>Trash is empty</h3>
+                        <p>Deleted tasks will appear here</p>
+                    </div>
+                    <div class="trash-tasks" id="trashTasks"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal-overlay" id="taskModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Create Task</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskTitle">Title:</label>
+                        <input type="text" id="taskTitle" class="task-input">
+                    </div>
+                    <div class="form-group date-time-group">
+                        <div>
+                            <label for="taskDate">Date:</label>
+                            <div class="date-input-container">
+                                <input type="date" id="taskDate" class="task-input date-input">
+                                <span class="date-icon"></span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="taskTime">Hour:</label>
+                            <div class="time-input-container">
+                                <input type="time" id="taskTime" class="task-input time-input">
+                                <span class="time-icon"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="taskDescription">Description (optional):</label>
+                    <textarea id="taskDescription" class="task-input task-textarea"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <!-- Removed status section completely -->
+                    <div class="form-group">
+                        <label>Remember:</label>
+                        <div class="remember-toggle">
+                            <input type="checkbox" id="taskReminder" class="remember-checkbox">
+                            <label for="taskReminder" class="remember-icon">🔔</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel">CANCEL</button>
+                <button class="btn-save" id="taskActionBtn">CREATE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Removed delete confirmation modal completely -->
+
+    <script type="module" src="../scripts/dashboard.controller.js"></script>
+</body>
+</html>

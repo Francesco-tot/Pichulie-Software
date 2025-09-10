@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Pichulie</title>
+  <link rel="stylesheet" href="../styles/style.css">
+</head>
+<body>
+  <div class="auth-container">
+    
+    <!-- Columna izquierda -->
+    <div class="auth-left">
+      <div class="branding">
+        <img src="../../public/logo.png" alt="Pichulie logo" class="logo">
+        <!--  <img src="../../public/calendar.png" alt="calendar icon" class="calendar"> -->
+      </div>
+    </div>
+
+    <!-- Columna derecha -->
+    <div class="auth-right">
+      <h1>Welcome</h1>
+      <form>
+        <input type="text" id ="name" placeholder="Name" required>
+        <!-- <input type="text" id="last-name" placeholder="Last name" required> -->
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="number" id="age" placeholder="Age" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <input type="password" id = "passwordCheck" placeholder="Confirm password" required>
+        <button id="register" type="button" class="btn">Register</button>
+
+        <div class="google-btn">
+          <img src="../../public/google.png" alt="Google logo"> Continue with Google
+        </div>
+
+        <div class="footer-text">
+          Don’t have an account? <a href="login.html">Sign up</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="../scripts/register.controller.js"></script>
+</body>
+</html>
+
+
