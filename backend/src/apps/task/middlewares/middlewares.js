@@ -1,4 +1,4 @@
-/* const jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 
 /**
  * JWT Authentication Middleware
@@ -21,29 +21,6 @@
  * @see {@link https://tools.ietf.org/html/rfc6750} Bearer Token RFC
  */
 
-/*
-const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No token provided" });
-  }
-
-  const token = authHeader.split(" ")[1]; // quitar el "Bearer"
-
-  try {
-    const decoded = jwt.verify(tok * en, process.env.JWT_SECRET);
-    req.user = decoded; // payload: { id, email, ... }
-    next();
-  } catch (err) {
-    return res.status(403).json({ message: "Invalid or expired token" });
-  }
-};
-
-module.exports = authMiddleware;
-
-*/
-
 const jwt = require("jsonwebtoken");
 
 const auth = (req, res, next) => {
@@ -52,15 +29,15 @@ const auth = (req, res, next) => {
     return res.status(401).json({ message: "No token provided" });
   }
 
-  // El header viene como "Bearer token"
+  // Header comes in format "Bearer <token"
   const token = authHeader.split(" ")[1];
   if (!token) {
     return res.status(401).json({ message: "Invalid token format" });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); // tu secret en .env
-    req.user = decoded; // 👈 aquí queda { id, email, ... }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
     next();
   } catch (error) {
     return res.status(401).json({ message: "Invalid or expired token" });

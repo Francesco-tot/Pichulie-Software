@@ -4,7 +4,7 @@ const taskRoutes = require("./taskRoutes");
 
 const router = express.Router();
 
-// Rutas de usuarios (incluye login y reset de contraseña)
+// User routes (includes login, register, password reset)
 router.use("/api/users", userRoutes);
 
 // Task routes (create and get tasks)

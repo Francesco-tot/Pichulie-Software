@@ -1,46 +1,5 @@
 const Task = require('../models/models');
-
-// Helper function for error handling
-/**
- * Server error handler utility function
- * 
- * Centralized error handling function that manages server errors with
- * environment-aware logging and consistent client responses. Provides
- * detailed error information in development while maintaining security
- * in production by hiding sensitive error details.
- * 
- * Error handling behavior:
- * - **Development mode**: Logs full error details including stack trace to console
- * - **Production mode**: Logs only generic error occurrence without sensitive details
- * - **Client response**: Always returns generic message to prevent information leakage
- * - **Error details**: Included in response only in development environment
- * 
- * Security:
- * - Prevents sensitive error information from being exposed to clients in production
- * - Logs detailed errors only in development for debugging purposes
- * - Maintains consistent error response structure across all endpoints
- * 
- * Performance:
- * - Minimal overhead as it only performs console logging and JSON response
- * - Conditional logging based on environment reduces production log noise
- * 
- * @see {@link https://expressjs.com/en/guide/error-handling.html} Express Error Handling
- * @see {@link https://nodejs.org/api/errors.html} Node.js Error Documentation
- */
-const handleServerError = (error, context, res) => {
-  if (process.env.NODE_ENV === 'development') {
-    console.error(`${context} error:`, error);
-    console.error('Stack trace:', error.stack);
-  } else {
-    console.error(`${context} error occurred`);
-  }
-  
-  return res.status(500).json({ 
-    success: false,
-    message: 'Try it again later',
-    error: process.env.NODE_ENV === 'development' ? error.message : undefined
-  });
-};
+const handleServerError = require('../../../middlewares/errorHandler');
 
 /**
  * Get user tasks controller
@@ -159,6 +118,18 @@ const createTask = async (req, res) => {
   try {
     const { title, detail, status, task_date } = req.body;
 
+    if (!title || !status || !task_date) {
+      return res.status(400).json({ message: "Not all required fields have been entered." })
+    };
+
+    if (title.length > 50) {
+      return res.status(400).json({ message: "Title cannot exceed 50 characters." })
+    };
+
+    if (detail.length > 500) {
+      return res.status(400).json({ message: "Detail cannot exceed 50 characters." })
+    };
+
     const newTask = new Task({
       title,
       detail,
@@ -167,64 +138,15 @@ const createTask = async (req, res) => {
       user_id: req.user.id,
     });
 
-    await newTask.save();
-
+    const savedTask = await newTask.save();
+    console.log('pass 3');
     res.status(201).json({
-      message: `Task created successfully with id: ${newTask.id}`,
-      task: newTask,
+      message: `Task created successfully with id: ${savedTask.id}`,
+      task: savedTask,
     });
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Task creation error:', error);
-    }
-    res.status(500).json({ message: 'Try again later' });
+    return handleServerError(error, 'Create user task', res);
   }
 };
 
-/**
- * Get tasks by user with grouping controller
- * 
- * Retrieves all tasks for the authenticated user, sorts them by specified criteria,
- * and groups them by status for organized display. Provides a structured view
- * of user tasks organized by their current status with flexible sorting options.
- * 
- * Task retrieval and grouping flow:
- * 1. Determines sort criteria from query parameter (title or task_date)
- * 2. Retrieves all tasks for authenticated user with sorting applied
- * 3. Groups tasks by status using Array.reduce method
- * 4. Creates organized structure with tasks categorized by status
- * 5. Returns grouped tasks in structured response format
- * 6. Handles errors with environment-aware logging
- * 
- * @see {@link https://docs.mongodb.com/manual/reference/method/cursor.sort/} MongoDB Sort Documentation
- * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce} Array.reduce() Documentation
- * @see {@link https://mongoosejs.com/docs/api.html#query_Query-sort} Mongoose Sort Documentation
- */
-const getTasksByUser = async (req, res) => {
-  try {
-    // Sort by title by default and by title if specified
-    const sortBy = req.query.sort === 'title' ? { title: 1 } : { task_date: 1 };
-
-    // Find tasks by the user and sort them
-    const tasks = await Task.find({ user_id: req.user.id }).sort(sortBy);
-
-    // Group by status
-    const grouped = tasks.reduce((acc, task) => {
-      if (!acc[task.status]) acc[task.status] = [];
-
-      acc[task.status].push(task);
-
-      return acc;
-    }, {});
-
-    res.status(200).json({
-      message: 'Tasks grouped by status',
-      tasks: grouped,
-    });
-  } catch (error) {
-    if (process.env.NODE_ENV === 'development') console.error('Get tasks error:', error);
-    res.status(500).json({ message: 'Try again later' });
-  }
-};
-
-module.exports = { createTask, getTasksByUser, getUserTasks };
+module.exports = { createTask, getUserTasks };
