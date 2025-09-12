@@ -139,7 +139,7 @@ const createTask = async (req, res) => {
     });
 
     const savedTask = await newTask.save();
-    console.log('pass 3');
+
     res.status(201).json({
       message: `Task created successfully with id: ${savedTask.id}`,
       task: savedTask,

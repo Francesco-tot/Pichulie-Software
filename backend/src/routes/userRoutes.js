@@ -1,6 +1,7 @@
 const express = require('express');
-const { login, requestPasswordReset, resetPassword, validateResetToken, resendResetToken, register } = require('../apps/user/controllers/controllers');
+const { login, requestPasswordReset, resetPassword, validateResetToken, resendResetToken, register, update } = require('../apps/user/controllers/controllers');
 const loginLimiter = require('../apps/user/middlewares/middlewares');
+const { authenticateToken } = require('../middlewares/auth');
 
 const router = express.Router();
 
@@ -20,7 +21,9 @@ router.post('/login', loginLimiter, login); // LoginTime disable
  * @description Creates a new user account with provided information.
  */
 //Register route
- router.post('/register', register);
+router.post('/register', register);
+
+router.put('/update', authenticateToken, update);
 
 // Routes for password reset
 /**

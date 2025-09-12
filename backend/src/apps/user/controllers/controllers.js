@@ -150,6 +150,61 @@ const login = async (req, res) => {
   }
 };
 
+const update = async (req, res) => {
+  try {
+    const {email, name, age, oldPassword, password} = req.body;
+    const user = await User.findById(req.user.id);
+
+    // Check if is any field filled
+    if (!email && !name && !age && !oldPassword && !password) {
+      return res.status(400).json({ message: 'At least one field must be filled' });
+    } 
+
+    // If the user wants to update the password, both old and new password must be provided
+    if (!oldPassword || !password) {
+      return res.status(400).json({ message: 'To update the password both old and new password are required' });
+    }
+
+    // Verify if email already exists to prevent duplicates
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(409).json({ message: 'An account with this email already exists'});
+    }
+
+    // Cheking age limits
+    if (age && (age < 13 || age > 122)) {
+      return res.status(400).json({ message: 'Please enter a valid age' });
+    }
+
+    // Check if the old password matches using bcrypt
+    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordValid) return res.status(401).json({ message: 'Invalid password' });
+    
+    //Checking new password length and match
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
+    if (oldPassword === password) {
+      return res.status(400).json({ message: 'New password can not be the same as the old password'});
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ message: 'New password must be at least 8 characters long' });
+    }
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({ message: 'New password must contain at least one uppercase letter, one lowercase letter, and one number.' });
+    }
+
+    // Updating the fields that were fulfilled and aproved
+    if (email) user.email = email;
+    if (name) user.name = name;
+    if (age) user.age = age;
+    if (password) user.password = await bcrypt.hash(password, 10);
+
+    await user.save();
+    return res.status(200).json({ message: 'User updated successfully' });
+
+  } catch (error){
+    return handleServerError(error, 'Update user', res);
+  }
+}
 
 // Configure email transporter
 /**
@@ -588,4 +643,4 @@ const resendResetToken = async (req, res) => {
   }
 };
 
-module.exports = { login, requestPasswordReset, resetPassword, validateResetToken, resendResetToken, register };
+module.exports = { login, requestPasswordReset, resetPassword, validateResetToken, resendResetToken, register, update };
