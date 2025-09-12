@@ -161,7 +161,7 @@ const update = async (req, res) => {
     } 
 
     // If the user wants to update the password, both old and new password must be provided
-    if (!oldPassword || !password) {
+    if (!oldPassword ^ !password) {
       return res.status(400).json({ message: 'To update the password both old and new password are required' });
     }
 
@@ -177,21 +177,25 @@ const update = async (req, res) => {
     }
 
     // Check if the old password matches using bcrypt
-    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
-    if (!isPasswordValid) return res.status(401).json({ message: 'Invalid password' });
-    
-    //Checking new password length and match
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
-    if (oldPassword === password) {
-      return res.status(400).json({ message: 'New password can not be the same as the old password'});
-    }
-    if (password.length < 8) {
-      return res.status(400).json({ message: 'New password must be at least 8 characters long' });
-    }
-    if (!passwordRegex.test(password)) {
-      return res.status(400).json({ message: 'New password must contain at least one uppercase letter, one lowercase letter, and one number.' });
+    if (oldPassword) {
+      const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+      if (!isPasswordValid) return res.status(401).json({ message: 'Invalid password' });
     }
 
+    //Checking new password length and match
+    if (password) {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
+      if (oldPassword === password) {
+        return res.status(400).json({ message: 'New password can not be the same as the old password'});
+      }
+      if (password.length < 8) {
+        return res.status(400).json({ message: 'New password must be at least 8 characters long' });
+      }
+      if (!passwordRegex.test(password)) {
+        return res.status(400).json({ message: 'New password must contain at least one uppercase letter, one lowercase letter, and one number.' });
+      }
+    }
+    
     // Updating the fields that were fulfilled and aproved
     if (email) user.email = email;
     if (name) user.name = name;
